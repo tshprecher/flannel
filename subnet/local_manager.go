@@ -21,7 +21,7 @@ import (
 	"time"
 
 	etcd "github.com/coreos/flannel/Godeps/_workspace/src/github.com/coreos/etcd/client"
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/coreos/flannel/Godeps/_workspace/src/golang.org/x/net/context"
 	"github.com/coreos/flannel/pkg/ip"
 )
@@ -131,7 +131,7 @@ func (m *LocalManager) tryAcquireLease(ctx context.Context, network string, conf
 	if l := findLeaseByIP(leases, extIaddr); l != nil {
 		// make sure the existing subnet is still within the configured network
 		if isSubnetConfigCompat(config, l.Subnet) {
-			log.Infof("Found lease (%v) for current IP (%v), reusing", l.Subnet, extIaddr)
+			glog.Infof("Found lease (%v) for current IP (%v), reusing", l.Subnet, extIaddr)
 
 			ttl := time.Duration(0)
 			if !l.Expiration.IsZero() {
@@ -147,7 +147,7 @@ func (m *LocalManager) tryAcquireLease(ctx context.Context, network string, conf
 			l.Expiration = exp
 			return l, nil
 		} else {
-			log.Infof("Found lease (%v) for current IP (%v) but not compatible with current config, deleting", l.Subnet, extIaddr)
+			glog.Infof("Found lease (%v) for current IP (%v) but not compatible with current config, deleting", l.Subnet, extIaddr)
 			if err := m.registry.deleteSubnet(ctx, network, l.Subnet); err != nil {
 				return nil, err
 			}
@@ -176,7 +176,7 @@ func (m *LocalManager) tryAcquireLease(ctx context.Context, network string, conf
 }
 
 func (m *LocalManager) allocateSubnet(config *Config, leases []Lease) (ip.IP4Net, error) {
-	log.Infof("Picking subnet in range %s ... %s", config.SubnetMin, config.SubnetMax)
+	glog.Infof("Picking subnet in range %s ... %s", config.SubnetMin, config.SubnetMax)
 
 	var bag []ip.IP4
 	sn := ip.IP4Net{IP: config.SubnetMin, PrefixLen: config.SubnetLen}
@@ -263,7 +263,7 @@ func (m *LocalManager) WatchLease(ctx context.Context, network string, sn ip.IP4
 		}, nil
 
 	case isIndexTooSmall(err):
-		log.Warning("Watch of subnet leases failed because etcd index outside history window")
+		glog.Warning("Watch of subnet leases failed because etcd index outside history window")
 		return m.leaseWatchReset(ctx, network, sn)
 
 	default:
@@ -291,7 +291,7 @@ func (m *LocalManager) WatchLeases(ctx context.Context, network string, cursor i
 		}, nil
 
 	case isIndexTooSmall(err):
-		log.Warning("Watch of subnet leases failed because etcd index outside history window")
+		glog.Warning("Watch of subnet leases failed because etcd index outside history window")
 		return m.leasesWatchReset(ctx, network)
 
 	default:
@@ -323,7 +323,7 @@ func (m *LocalManager) WatchNetworks(ctx context.Context, cursor interface{}) (N
 			nextIndex = index
 
 		case isIndexTooSmall(err):
-			log.Warning("Watch of networks failed because etcd index outside history window")
+			glog.Warning("Watch of networks failed because etcd index outside history window")
 			return m.networkWatchReset(ctx)
 
 		default:

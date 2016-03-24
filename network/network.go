@@ -20,7 +20,7 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/coreos/flannel/Godeps/_workspace/src/golang.org/x/net/context"
 
 	"github.com/coreos/flannel/backend"
@@ -103,7 +103,7 @@ func (n *Network) retryInit() error {
 			return err
 		}
 
-		log.Error(err)
+		glog.Error(err)
 
 		select {
 		case <-n.ctx.Done():
@@ -141,7 +141,7 @@ func (n *Network) runOnce(extIface *backend.ExternalInterface, inited func(bn ba
 	defer func() {
 		if n.ipMasq {
 			if err := teardownIPMasq(n.Config.Network); err != nil {
-				log.Errorf("Failed to tear down IP Masquerade for network %v: %v", n.Name, err)
+				glog.Errorf("Failed to tear down IP Masquerade for network %v: %v", n.Name, err)
 			}
 		}
 	}()
@@ -154,12 +154,12 @@ func (n *Network) runOnce(extIface *backend.ExternalInterface, inited func(bn ba
 		case <-time.After(dur):
 			err := n.sm.RenewLease(n.ctx, n.Name, n.bn.Lease())
 			if err != nil {
-				log.Error("Error renewing lease (trying again in 1 min): ", err)
+				glog.Error("Error renewing lease (trying again in 1 min): ", err)
 				dur = time.Minute
 				continue
 			}
 
-			log.Info("Lease renewed, new expiration: ", n.bn.Lease().Expiration)
+			glog.Info("Lease renewed, new expiration: ", n.bn.Lease().Expiration)
 			dur = n.bn.Lease().Expiration.Sub(time.Now()) - renewMargin
 
 		case e := <-evts:
@@ -169,7 +169,7 @@ func (n *Network) runOnce(extIface *backend.ExternalInterface, inited func(bn ba
 				dur = n.bn.Lease().Expiration.Sub(time.Now()) - renewMargin
 
 			case subnet.EventRemoved:
-				log.Warning("Lease has been revoked")
+				glog.Warning("Lease has been revoked")
 				interruptFunc()
 				return errInterrupted
 			}

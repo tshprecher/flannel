@@ -23,20 +23,20 @@ import (
 	"reflect"
 	"unsafe"
 
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 
 	"github.com/coreos/flannel/pkg/ip"
 )
 
 func runCProxy(tun *os.File, conn *net.UDPConn, ctl *os.File, tunIP ip.IP4, tunMTU int) {
 	var log_errors int
-	if log.V(1) {
+	if glog.V(1) {
 		log_errors = 1
 	}
 
 	c, err := conn.File()
 	if err != nil {
-		log.Error("Converting UDPConn to File failed: ", err)
+		glog.Error("Converting UDPConn to File failed: ", err)
 		return
 	}
 	defer c.Close()

@@ -25,7 +25,7 @@ import (
 
 	etcd "github.com/coreos/flannel/Godeps/_workspace/src/github.com/coreos/etcd/client"
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/coreos/etcd/pkg/transport"
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/coreos/flannel/Godeps/_workspace/src/golang.org/x/net/context"
 
 	"github.com/coreos/flannel/pkg/ip"
@@ -137,7 +137,7 @@ func (esr *etcdSubnetRegistry) getSubnets(ctx context.Context, network string) (
 	for _, node := range resp.Node.Nodes {
 		l, err := nodeToLease(node)
 		if err != nil {
-			log.Warningf("Ignoring bad subnet node: %v", err)
+			glog.Warningf("Ignoring bad subnet node: %v", err)
 			continue
 		}
 

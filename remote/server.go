@@ -27,7 +27,7 @@ import (
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/coreos/etcd/pkg/transport"
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/coreos/go-systemd/activation"
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/coreos/go-systemd/daemon"
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/gorilla/mux"
 	"github.com/coreos/flannel/Godeps/_workspace/src/golang.org/x/net/context"
 
@@ -40,7 +40,7 @@ func jsonResponse(w http.ResponseWriter, code int, v interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 	if err := json.NewEncoder(w).Encode(v); err != nil {
-		log.Error("Error JSON encoding response: %v", err)
+		glog.Error("Error JSON encoding response: %v", err)
 	}
 }
 
@@ -382,7 +382,7 @@ func RunServer(ctx context.Context, sm subnet.Manager, listenAddr, cafile, certf
 
 	l, err := listener(listenAddr, cafile, certfile, keyfile)
 	if err != nil {
-		log.Errorf("Error listening on %v: %v", listenAddr, err)
+		glog.Errorf("Error listening on %v: %v", listenAddr, err)
 		return
 	}
 
@@ -399,6 +399,6 @@ func RunServer(ctx context.Context, sm subnet.Manager, listenAddr, cafile, certf
 		<-c
 
 	case err := <-c:
-		log.Errorf("Error serving on %v: %v", listenAddr, err)
+		glog.Errorf("Error serving on %v: %v", listenAddr, err)
 	}
 }

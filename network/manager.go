@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/coreos/go-systemd/daemon"
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/coreos/flannel/Godeps/_workspace/src/golang.org/x/net/context"
 
 	"github.com/coreos/flannel/backend"
@@ -130,7 +130,7 @@ func lookupExtIface(ifname string) (*backend.ExternalInterface, error) {
 			}
 		}
 	} else {
-		log.Info("Determining IP address of default interface")
+		glog.Info("Determining IP address of default interface")
 		if iface, err = ip.GetDefaultGatewayIface(); err != nil {
 			return nil, fmt.Errorf("failed to get default interface: %s", err)
 		}
@@ -160,8 +160,8 @@ func lookupExtIface(ifname string) (*backend.ExternalInterface, error) {
 		eaddr = iaddr
 	}
 
-	log.Infof("Using %s as external interface", iaddr)
-	log.Infof("Using %s as external endpoint", eaddr)
+	glog.Infof("Using %s as external interface", iaddr)
+	glog.Infof("Using %s as external endpoint", eaddr)
 
 	return &backend.ExternalInterface{
 		Iface:     iface,
@@ -235,18 +235,18 @@ func (m *Manager) forEachNetwork(f func(n *Network)) {
 func (m *Manager) runNetwork(n *Network) {
 	n.Run(m.extIface, func(bn backend.Network) {
 		if m.isMultiNetwork() {
-			log.Infof("%v: lease acquired: %v", n.Name, bn.Lease().Subnet)
+			glog.Infof("%v: lease acquired: %v", n.Name, bn.Lease().Subnet)
 
 			path := filepath.Join(opts.subnetDir, n.Name) + ".env"
 			if err := writeSubnetFile(path, n.Config.Network, m.ipMasq, bn); err != nil {
-				log.Warningf("%v failed to write subnet file: %s", n.Name, err)
+				glog.Warningf("%v failed to write subnet file: %s", n.Name, err)
 				return
 			}
 		} else {
-			log.Infof("Lease acquired: %v", bn.Lease().Subnet)
+			glog.Infof("Lease acquired: %v", bn.Lease().Subnet)
 
 			if err := writeSubnetFile(opts.subnetFile, n.Config.Network, m.ipMasq, bn); err != nil {
-				log.Warningf("%v failed to write subnet file: %s", n.Name, err)
+				glog.Warningf("%v failed to write subnet file: %s", n.Name, err)
 				return
 			}
 			daemon.SdNotify("READY=1")
@@ -278,7 +278,7 @@ func (m *Manager) watchNetworks() {
 			for _, e := range evtBatch {
 				netname := e.Network
 				if !m.isNetAllowed(netname) {
-					log.Infof("Network %q is not allowed", netname)
+					glog.Infof("Network %q is not allowed", netname)
 					continue
 				}
 
@@ -286,11 +286,11 @@ func (m *Manager) watchNetworks() {
 				case subnet.EventAdded:
 					n := NewNetwork(m.ctx, m.sm, m.bm, netname, m.ipMasq)
 					if err := m.addNetwork(n); err != nil {
-						log.Infof("Network %q: %v", netname, err)
+						glog.Infof("Network %q: %v", netname, err)
 						continue
 					}
 
-					log.Infof("Network added: %v", netname)
+					glog.Infof("Network added: %v", netname)
 
 					wg.Add(1)
 					go func() {
@@ -299,11 +299,11 @@ func (m *Manager) watchNetworks() {
 					}()
 
 				case subnet.EventRemoved:
-					log.Infof("Network removed: %v", netname)
+					glog.Infof("Network removed: %v", netname)
 
 					n, ok := m.getNetwork(netname)
 					if !ok {
-						log.Warningf("Network %v unknown; ignoring EventRemoved", netname)
+						glog.Warningf("Network %v unknown; ignoring EventRemoved", netname)
 						continue
 					}
 					n.Cancel()
@@ -330,7 +330,7 @@ func (m *Manager) Run(ctx context.Context) {
 			}
 
 			// Otherwise retry in a few seconds
-			log.Warning("Failed to retrieve networks (will retry): %v", err)
+			glog.Warning("Failed to retrieve networks (will retry): %v", err)
 			select {
 			case <-ctx.Done():
 				return

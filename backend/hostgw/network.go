@@ -20,7 +20,7 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/vishvananda/netlink"
 	"github.com/coreos/flannel/Godeps/_workspace/src/golang.org/x/net/context"
 
@@ -48,7 +48,7 @@ func (n *network) MTU() int {
 func (n *network) Run(ctx context.Context) {
 	wg := sync.WaitGroup{}
 
-	log.Info("Watching for new subnet leases")
+	glog.Info("Watching for new subnet leases")
 	evts := make(chan []subnet.Event)
 	wg.Add(1)
 	go func() {
@@ -80,10 +80,10 @@ func (n *network) handleSubnetEvents(batch []subnet.Event) {
 	for _, evt := range batch {
 		switch evt.Type {
 		case subnet.EventAdded:
-			log.Infof("Subnet added: %v via %v", evt.Lease.Subnet, evt.Lease.Attrs.PublicIP)
+			glog.Infof("Subnet added: %v via %v", evt.Lease.Subnet, evt.Lease.Attrs.PublicIP)
 
 			if evt.Lease.Attrs.BackendType != "host-gw" {
-				log.Warningf("Ignoring non-host-gw subnet: type=%v", evt.Lease.Attrs.BackendType)
+				glog.Warningf("Ignoring non-host-gw subnet: type=%v", evt.Lease.Attrs.BackendType)
 				continue
 			}
 
@@ -93,16 +93,16 @@ func (n *network) handleSubnetEvents(batch []subnet.Event) {
 				LinkIndex: n.linkIndex,
 			}
 			if err := netlink.RouteAdd(&route); err != nil {
-				log.Errorf("Error adding route to %v via %v: %v", evt.Lease.Subnet, evt.Lease.Attrs.PublicIP, err)
+				glog.Errorf("Error adding route to %v via %v: %v", evt.Lease.Subnet, evt.Lease.Attrs.PublicIP, err)
 				continue
 			}
 			n.addToRouteList(route)
 
 		case subnet.EventRemoved:
-			log.Info("Subnet removed: ", evt.Lease.Subnet)
+			glog.Info("Subnet removed: ", evt.Lease.Subnet)
 
 			if evt.Lease.Attrs.BackendType != "host-gw" {
-				log.Warningf("Ignoring non-host-gw subnet: type=%v", evt.Lease.Attrs.BackendType)
+				glog.Warningf("Ignoring non-host-gw subnet: type=%v", evt.Lease.Attrs.BackendType)
 				continue
 			}
 
@@ -112,13 +112,13 @@ func (n *network) handleSubnetEvents(batch []subnet.Event) {
 				LinkIndex: n.linkIndex,
 			}
 			if err := netlink.RouteDel(&route); err != nil {
-				log.Errorf("Error deleting route to %v: %v", evt.Lease.Subnet, err)
+				glog.Errorf("Error deleting route to %v: %v", evt.Lease.Subnet, err)
 				continue
 			}
 			n.removeFromRouteList(route)
 
 		default:
-			log.Error("Internal error: unknown event type: ", int(evt.Type))
+			glog.Error("Internal error: unknown event type: ", int(evt.Type))
 		}
 	}
 }
@@ -164,11 +164,11 @@ func (n *network) checkSubnetExistInRoutes() {
 			if !exist {
 				if err := netlink.RouteAdd(&route); err != nil {
 					if nerr, ok := err.(net.Error); !ok {
-						log.Errorf("Error recovering route to %v: %v, %v", route.Dst, route.Gw, nerr)
+						glog.Errorf("Error recovering route to %v: %v, %v", route.Dst, route.Gw, nerr)
 					}
 					continue
 				} else {
-					log.Infof("Route recovered %v : %v", route.Dst, route.Gw)
+					glog.Infof("Route recovered %v : %v", route.Dst, route.Gw)
 				}
 			}
 		}

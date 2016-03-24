@@ -21,7 +21,7 @@ import (
 	"syscall"
 	"time"
 
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/vishvananda/netlink"
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/vishvananda/netlink/nl"
 
@@ -91,7 +91,7 @@ func ensureLink(vxlan *netlink.Vxlan) (*netlink.Vxlan, error) {
 		}
 
 		// delete existing
-		log.Warningf("%q already exists with incompatable configuration: %v; recreating device", vxlan.Name, incompat)
+		glog.Warningf("%q already exists with incompatable configuration: %v; recreating device", vxlan.Name, incompat)
 		if err = netlink.LinkDel(existing); err != nil {
 			return nil, fmt.Errorf("failed to delete interface: %v", err)
 		}
@@ -156,12 +156,12 @@ type neigh struct {
 }
 
 func (dev *vxlanDevice) GetL2List() ([]netlink.Neigh, error) {
-	log.Infof("calling GetL2List() dev.link.Index: %d ", dev.link.Index)
+	glog.Infof("calling GetL2List() dev.link.Index: %d ", dev.link.Index)
 	return netlink.NeighList(dev.link.Index, syscall.AF_BRIDGE)
 }
 
 func (dev *vxlanDevice) AddL2(n neigh) error {
-	log.Infof("calling NeighAdd: %v, %v", n.IP, n.MAC)
+	glog.Infof("calling NeighAdd: %v, %v", n.IP, n.MAC)
 	return netlink.NeighAdd(&netlink.Neigh{
 		LinkIndex:    dev.link.Index,
 		State:        netlink.NUD_PERMANENT,
@@ -173,7 +173,7 @@ func (dev *vxlanDevice) AddL2(n neigh) error {
 }
 
 func (dev *vxlanDevice) DelL2(n neigh) error {
-	log.Infof("calling NeighDel: %v, %v", n.IP, n.MAC)
+	glog.Infof("calling NeighDel: %v, %v", n.IP, n.MAC)
 	return netlink.NeighDel(&netlink.Neigh{
 		LinkIndex:    dev.link.Index,
 		Family:       syscall.AF_BRIDGE,
@@ -184,7 +184,7 @@ func (dev *vxlanDevice) DelL2(n neigh) error {
 }
 
 func (dev *vxlanDevice) AddL3(n neigh) error {
-	log.Infof("calling NeighSet: %v, %v", n.IP, n.MAC)
+	glog.Infof("calling NeighSet: %v, %v", n.IP, n.MAC)
 	return netlink.NeighSet(&netlink.Neigh{
 		LinkIndex:    dev.link.Index,
 		State:        netlink.NUD_REACHABLE,
@@ -195,7 +195,7 @@ func (dev *vxlanDevice) AddL3(n neigh) error {
 }
 
 func (dev *vxlanDevice) DelL3(n neigh) error {
-	log.Infof("calling NeighDel: %v, %v", n.IP, n.MAC)
+	glog.Infof("calling NeighDel: %v, %v", n.IP, n.MAC)
 	return netlink.NeighDel(&netlink.Neigh{
 		LinkIndex:    dev.link.Index,
 		State:        netlink.NUD_REACHABLE,
@@ -208,14 +208,14 @@ func (dev *vxlanDevice) DelL3(n neigh) error {
 func (dev *vxlanDevice) MonitorMisses(misses chan *netlink.Neigh) {
 	nlsock, err := nl.Subscribe(syscall.NETLINK_ROUTE, syscall.RTNLGRP_NEIGH)
 	if err != nil {
-		log.Error("Failed to subscribe to netlink RTNLGRP_NEIGH messages")
+		glog.Error("Failed to subscribe to netlink RTNLGRP_NEIGH messages")
 		return
 	}
 
 	for {
 		msgs, err := nlsock.Receive()
 		if err != nil {
-			log.Errorf("Failed to receive from netlink: %v ", err)
+			glog.Errorf("Failed to receive from netlink: %v ", err)
 
 			time.Sleep(1 * time.Second)
 			continue
@@ -234,7 +234,7 @@ func isNeighResolving(state int) bool {
 func (dev *vxlanDevice) processNeighMsg(msg syscall.NetlinkMessage, misses chan *netlink.Neigh) {
 	neigh, err := netlink.NeighDeserialize(msg.Data)
 	if err != nil {
-		log.Error("Failed to deserialize netlink ndmsg: %v", err)
+		glog.Error("Failed to deserialize netlink ndmsg: %v", err)
 		return
 	}
 

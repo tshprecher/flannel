@@ -43,7 +43,7 @@ import (
 	"sync"
 
 	"github.com/coreos/flannel/Godeps/_workspace/src/code.google.com/p/google-api-go-client/googleapi"
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/coreos/flannel/Godeps/_workspace/src/golang.org/x/net/context"
 
 	"github.com/coreos/flannel/backend"
@@ -143,11 +143,11 @@ func (g *GCEBackend) handleMatchingRoute(subnet string) (bool, error) {
 	}
 
 	if matchingRoute.NextHopInstance == g.api.gceInstance.SelfLink {
-		log.Info("Exact pre-existing route found")
+		glog.Info("Exact pre-existing route found")
 		return true, nil
 	}
 
-	log.Info("Deleting conflicting route")
+	glog.Info("Deleting conflicting route")
 	operation, err := g.api.deleteRoute(subnet)
 	if err != nil {
 		return false, fmt.Errorf("error deleting conflicting route : %v", err)

@@ -17,7 +17,7 @@ package subnet
 import (
 	"time"
 
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/coreos/flannel/Godeps/_workspace/src/golang.org/x/net/context"
 
 	"github.com/coreos/flannel/pkg/ip"
@@ -40,7 +40,7 @@ func WatchLeases(ctx context.Context, sm Manager, network string, ownLease *Leas
 				return
 			}
 
-			log.Errorf("Watch subnets: %v", err)
+			glog.Errorf("Watch subnets: %v", err)
 			time.Sleep(time.Second)
 			continue
 		}
@@ -145,7 +145,7 @@ func (lw *leaseWatcher) remove(lease *Lease) Event {
 		}
 	}
 
-	log.Errorf("Removed subnet (%s) was not found", lease.Subnet)
+	glog.Errorf("Removed subnet (%s) was not found", lease.Subnet)
 	return Event{EventRemoved, *lease, ""}
 }
 
@@ -169,7 +169,7 @@ func WatchNetworks(ctx context.Context, sm Manager, receiver chan []Event) {
 				return
 			}
 
-			log.Errorf("Watch networks: %v", err)
+			glog.Errorf("Watch networks: %v", err)
 			time.Sleep(time.Second)
 			continue
 		}
@@ -249,7 +249,7 @@ func (nw *netWatcher) remove(network string) Event {
 	if _, ok := nw.networks[network]; ok {
 		delete(nw.networks, network)
 	} else {
-		log.Errorf("Removed network (%s) was not found", network)
+		glog.Errorf("Removed network (%s) was not found", network)
 	}
 
 	return Event{EventRemoved, Lease{}, network}
@@ -269,7 +269,7 @@ func WatchLease(ctx context.Context, sm Manager, network string, sn ip.IP4Net, r
 				return
 			}
 
-			log.Errorf("Subnet watch failed: %v", err)
+			glog.Errorf("Subnet watch failed: %v", err)
 			time.Sleep(time.Second)
 			continue
 		}

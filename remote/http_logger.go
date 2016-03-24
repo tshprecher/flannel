@@ -15,7 +15,7 @@
 package remote
 
 import (
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 	"net/http"
 )
 
@@ -44,7 +44,7 @@ type httpLoggerHandler struct {
 func (lh httpLoggerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resp := &httpResp{w, 0}
 	lh.h.ServeHTTP(resp, r)
-	log.Infof("%v %v - %v", r.Method, r.RequestURI, resp.status)
+	glog.Infof("%v %v - %v", r.Method, r.RequestURI, resp.status)
 }
 
 func httpLogger(h http.Handler) http.Handler {

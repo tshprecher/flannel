@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/coreos/go-iptables/iptables"
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 
 	"github.com/coreos/flannel/pkg/ip"
 )
@@ -44,7 +44,7 @@ func setupIPMasq(ipn ip.IP4Net) error {
 	}
 
 	for _, rule := range rules(ipn) {
-		log.Info("Adding iptables rule: ", strings.Join(rule, " "))
+		glog.Info("Adding iptables rule: ", strings.Join(rule, " "))
 		err = ipt.AppendUnique("nat", "POSTROUTING", rule...)
 		if err != nil {
 			return fmt.Errorf("failed to insert IP masquerade rule: %v", err)
@@ -61,7 +61,7 @@ func teardownIPMasq(ipn ip.IP4Net) error {
 	}
 
 	for _, rule := range rules(ipn) {
-		log.Info("Deleting iptables rule: ", strings.Join(rule, " "))
+		glog.Info("Deleting iptables rule: ", strings.Join(rule, " "))
 		err = ipt.Delete("nat", "POSTROUTING", rule...)
 		if err != nil {
 			return fmt.Errorf("failed to delete IP masquerade rule: %v", err)

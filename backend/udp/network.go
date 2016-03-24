@@ -21,7 +21,7 @@ import (
 	"sync"
 	"syscall"
 
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/vishvananda/netlink"
 	"github.com/coreos/flannel/Godeps/_workspace/src/golang.org/x/net/context"
 
@@ -95,7 +95,7 @@ func (n *network) Run(ctx context.Context) {
 		wg.Done()
 	}()
 
-	log.Info("Watching for new subnet leases")
+	glog.Info("Watching for new subnet leases")
 
 	evts := make(chan []subnet.Event)
 
@@ -188,17 +188,17 @@ func (n *network) processSubnetEvents(batch []subnet.Event) {
 	for _, evt := range batch {
 		switch evt.Type {
 		case subnet.EventAdded:
-			log.Info("Subnet added: ", evt.Lease.Subnet)
+			glog.Info("Subnet added: ", evt.Lease.Subnet)
 
 			setRoute(n.ctl, evt.Lease.Subnet, evt.Lease.Attrs.PublicIP, n.port)
 
 		case subnet.EventRemoved:
-			log.Info("Subnet removed: ", evt.Lease.Subnet)
+			glog.Info("Subnet removed: ", evt.Lease.Subnet)
 
 			removeRoute(n.ctl, evt.Lease.Subnet)
 
 		default:
-			log.Error("Internal error: unknown event type: ", int(evt.Type))
+			glog.Error("Internal error: unknown event type: ", int(evt.Type))
 		}
 	}
 }

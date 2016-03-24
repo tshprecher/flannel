@@ -22,7 +22,7 @@ import (
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/aws/aws-sdk-go/service/ec2"
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/coreos/flannel/Godeps/_workspace/src/golang.org/x/net/context"
 
 	"github.com/coreos/flannel/backend"
@@ -93,25 +93,25 @@ func (be *AwsVpcBackend) RegisterNetwork(ctx context.Context, network string, co
 	ec2c := ec2.New(&aws.Config{Region: aws.String(region)})
 
 	if _, err = be.disableSrcDestCheck(instanceID, ec2c); err != nil {
-		log.Infof("Warning- disabling source destination check failed: %v", err)
+		glog.Infof("Warning- disabling source destination check failed: %v", err)
 	}
 
 	if cfg.RouteTableID == "" {
-		log.Infof("RouteTableID not passed as config parameter, detecting ...")
+		glog.Infof("RouteTableID not passed as config parameter, detecting ...")
 		if cfg.RouteTableID, err = be.detectRouteTableID(instanceID, ec2c); err != nil {
 			return nil, err
 		}
 	}
 
-	log.Info("RouteRouteTableID: ", cfg.RouteTableID)
+	glog.Info("RouteRouteTableID: ", cfg.RouteTableID)
 
 	matchingRouteFound, err := be.checkMatchingRoutes(cfg.RouteTableID, instanceID, l.Subnet.String(), ec2c)
 	if err != nil {
-		log.Errorf("Error describing route tables: %v", err)
+		glog.Errorf("Error describing route tables: %v", err)
 
 		if ec2Err, ok := err.(awserr.Error); ok {
 			if ec2Err.Code() == "UnauthorizedOperation" {
-				log.Errorf("Note: DescribeRouteTables permission cannot be bound to any resource")
+				glog.Errorf("Note: DescribeRouteTables permission cannot be bound to any resource")
 			}
 		}
 	}
@@ -161,7 +161,7 @@ func (be *AwsVpcBackend) checkMatchingRoutes(routeTableID, instanceID, subnet st
 					break
 				}
 
-				log.Errorf("Deleting invalid *active* matching route: %s, %s \n", *route.DestinationCidrBlock, *route.InstanceId)
+				glog.Errorf("Deleting invalid *active* matching route: %s, %s \n", *route.DestinationCidrBlock, *route.InstanceId)
 			}
 		}
 	}
@@ -209,8 +209,8 @@ func (be *AwsVpcBackend) detectRouteTableID(instanceID string, ec2c *ec2.EC2) (s
 	subnetID := resp.Reservations[0].Instances[0].SubnetId
 	vpcID := resp.Reservations[0].Instances[0].VpcId
 
-	log.Info("Subnet-ID: ", *subnetID)
-	log.Info("VPC-ID: ", *vpcID)
+	glog.Info("Subnet-ID: ", *subnetID)
+	glog.Info("VPC-ID: ", *vpcID)
 
 	filter := newFilter()
 	filter.Add("association.subnet-id", *subnetID)
@@ -238,7 +238,7 @@ func (be *AwsVpcBackend) detectRouteTableID(instanceID string, ec2c *ec2.EC2) (s
 
 	res, err = ec2c.DescribeRouteTables(routeTablesInput)
 	if err != nil {
-		log.Info("error describing route tables: ", err)
+		glog.Info("error describing route tables: ", err)
 	}
 
 	if len(res.RouteTables) == 0 {

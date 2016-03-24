@@ -24,7 +24,7 @@ import (
 	"syscall"
 
 	"github.com/coreos/flannel/Godeps/_workspace/src/github.com/coreos/pkg/flagutil"
-	log "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
+	glog "github.com/coreos/flannel/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/coreos/flannel/Godeps/_workspace/src/golang.org/x/net/context"
 
 	"github.com/coreos/flannel/network"
@@ -112,12 +112,12 @@ func main() {
 
 	sm, err := newSubnetManager()
 	if err != nil {
-		log.Error("Failed to create SubnetManager: ", err)
+		glog.Error("Failed to create SubnetManager: ", err)
 		os.Exit(1)
 	}
 
 	// Register for SIGINT and SIGTERM
-	log.Info("Installing signal handlers")
+	glog.Info("Installing signal handlers")
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
 
@@ -127,17 +127,17 @@ func main() {
 
 	if opts.listen != "" {
 		if opts.remote != "" {
-			log.Error("--listen and --remote are mutually exclusive")
+			glog.Error("--listen and --remote are mutually exclusive")
 			os.Exit(1)
 		}
-		log.Info("running as server")
+		glog.Info("running as server")
 		runFunc = func(ctx context.Context) {
 			remote.RunServer(ctx, sm, opts.listen, opts.remoteCAFile, opts.remoteCertfile, opts.remoteKeyfile)
 		}
 	} else {
 		nm, err := network.NewNetworkManager(ctx, sm)
 		if err != nil {
-			log.Error("Failed to create NetworkManager: ", err)
+			glog.Error("Failed to create NetworkManager: ", err)
 			os.Exit(1)
 		}
 
@@ -157,7 +157,7 @@ func main() {
 	// unregister to get default OS nuke behaviour in case we don't exit cleanly
 	signal.Stop(sigs)
 
-	log.Info("Exiting...")
+	glog.Info("Exiting...")
 	cancel()
 
 	wg.Wait()
